@@ -53,6 +53,8 @@ async function seed() {
     console.log('✓ Seeding completed successfully');
 
     await app.close();
+
+    process.exit(0);
   } catch (error) {
     console.error('✗ Seeding failed:', error);
     process.exit(1);
