@@ -122,7 +122,3 @@ npm test
 npm run test:cov
 
 ```
-
----
-
-**Would you like me to create a Postman collection file based on these endpoints so you can test the transfer flow immediately?**
