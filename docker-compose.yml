@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: simple-wallet-postgres
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      # Use the variable for the host (left side), keep 5432 for the container (right side)
+      - "${DATABASE_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - simple-wallet-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: simple-wallet-redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - simple-wallet-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simple-wallet-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${APPLICATION_ENV}
+      PORT: ${APPLICATION_PORT}
+      # Inside Docker, the app connects to the SERVICE NAME (postgres), not localhost
+      DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@postgres:5432/${DATABASE_NAME}
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "${APPLICATION_PORT}:${APPLICATION_PORT}"
+    networks:
+      - simple-wallet-network
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  simple-wallet-network:
+    driver: bridge

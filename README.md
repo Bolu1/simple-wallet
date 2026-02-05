@@ -1,98 +1,128 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Simple Wallet App
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This is the repository for the Sycamore backend task. I have leveraged a modern tech stack to ensure data precision, system reliability, and maintainability through clean architecture.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 🏗️ Architectural Decisions
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This project is built with a focus on **long-term scalability** and **fault tolerance**. Here are my key design choices:
 
-## Project setup
+* **Domain-Driven Design (DDD):** I organized the codebase by feature modules (User, Wallet, Transfer, Interest). This ensures that business logic is encapsulated within its own domain, making the system easier to navigate and scale.
+* **Repository Pattern:** I used repositories to abstract the data access layer (Sequelize). By injecting repositories into my services rather than models directly, I decoupled business logic from the ORM, facilitating easier unit testing and providing the flexibility to switch data sources in the future.
+* **Eventual Consistency via Message Queues:** For transaction processing, I opted for **Bull Queue (Redis)**. Instead of processing heavy financial transfers in a single request-response cycle, I queue them. This ensures:
+* **Scalability:** The system can handle spikes in transaction volume without crashing.
+* **Reliability:** Built-in retry mechanisms with exponential backoff handle transient database or network failures.
+* **User Experience:** The API responds immediately, while the heavy lifting happens in the background.
 
+
+* **Precision Engineering:** In fintech, floating-point math is a liability. I used **`decimal.js`** for all balance and interest calculations to ensure zero rounding errors.
+
+---
+
+## 💰 Interest Calculation Service
+
+A standout feature of this wallet is the **Automated Interest Accrual**.
+
+* **Rate:** 27.5% APR (Annual Percentage Rate).
+* **Formula:** Interest is calculated daily using the following formula:
+
+
+* **Logic:** The service automatically detects leap years (366 days) vs. non-leap years (365 days) to ensure absolute accuracy.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+* **Docker** and **Docker Compose**
+* Node.js 18+ (if running locally)
+
+### Setup Instructions
+
+1. **Clone the Repository:**
 ```bash
-$ npm install
+git clone https://github.com/Bolu1/simple-wallet.git
+cd simple-wallet
+
 ```
 
-## Compile and run the project
 
+2. **Environment Configuration:**
+There is an `.env.example` file included in the root directory. Copy it to create your local environment file:
 ```bash
-# development
-$ npm run start
+cp .env.example .env
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
 
-## Run tests
 
+*Update the variables in `.env` if you have specific port preferences.*
+3. **Start the Application:**
+You can run the entire stack (PostgreSQL, Redis, NestJS) using Docker:
 ```bash
-# unit tests
-$ npm run test
+docker-compose up -d --build
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
 
-## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+*Alternatively, for local development, ensure Postgres and Redis are running, then use `npm run start:dev`.*
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+---
+
+## 🗄️ Database Management
+
+### Seeding the Database
+
+To populate your environment with test data (Users and Wallets), use the following command to reach inside the running container:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker exec -it simple-wallet-app npm run seed
+
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## 🛠️ API Highlights
 
-Check out a few resources that may come in handy when working with NestJS:
+The API follows standard RESTful principles.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 1. Get All User Wallets
 
-## Support
+* **Endpoint:** `GET /wallets`
+* **Description:** Retrieves all wallets associated with the authenticated user. **Use this to get the `Wallet IDs` needed for transfers.**
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 2. Initiate Transfer
 
-## Stay in touch
+* **Endpoint:** `POST /v1/transfer`
+* **Header:** `x-idempotency-key: <UUID>` (Mandatory to prevent double-spending/duplicate transactions).
+* **Body:**
+```json
+{
+    "fromWalletId": "2f970b6d-9d8b-475f-859a-4e85d57bc92b",
+    "toWalletId": "332ebe85-2a12-4b03-adfb-c830587b128e",
+    "amount": 100
+}
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```
 
-## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+---
+
+## 🧪 Testing
+
+The project includes a comprehensive test suite using Jest, covering precision math, leap year edge cases, and queue processing.
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm run test:cov
+
+```
+
+---
+
+**Would you like me to create a Postman collection file based on these endpoints so you can test the transfer flow immediately?**

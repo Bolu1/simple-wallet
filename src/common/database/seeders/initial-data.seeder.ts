@@ -39,14 +39,14 @@ async function seed() {
     // Create wallets
     await Wallet.create({
       userId: alice.id,
-      balance: 1000.00,
-      currency: Currency.USD,
+      balance: 10000.00,
+      currency: Currency.NGN,
     });
 
     await Wallet.create({
       userId: bob.id,
-      balance: 500.00,
-      currency: Currency.USD,
+      balance: 5000.00,
+      currency: Currency.NGN,
     });
 
     console.log('✓ Created wallets');

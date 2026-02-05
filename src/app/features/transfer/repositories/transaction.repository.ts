@@ -24,7 +24,7 @@ export class TransactionRepository {
       idempotencyKey: string;
       metadata?: Record<string, any>;
     },
-    transaction: SequelizeTransaction
+    transaction?: SequelizeTransaction
   ): Promise<Transaction> {
     return this.transactionModel.create(data, { transaction });
   }
@@ -32,7 +32,7 @@ export class TransactionRepository {
   async updateStatus(
     id: string,
     status: TransactionStatus,
-    transaction: SequelizeTransaction
+    transaction?: SequelizeTransaction
   ): Promise<void> {
     await this.transactionModel.update(
       { status },

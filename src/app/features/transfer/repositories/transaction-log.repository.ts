@@ -14,7 +14,7 @@ export class TransactionLogRepository {
       status: TransactionStatus;
       metadata?: Record<string, any>;
     },
-    transaction: SequelizeTransaction
+    transaction?: SequelizeTransaction
   ): Promise<TransactionLog> {
     return this.logModel.create(data, { transaction });
   }

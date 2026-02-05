@@ -50,7 +50,7 @@ export class Transaction extends Model {
 
   @Column({
     type: DataType.ENUM(...Object.values(Currency)),
-    defaultValue: Currency.USD,
+    defaultValue: Currency.NGN,
     allowNull: false,
   })
   currency: Currency;

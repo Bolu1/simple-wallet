@@ -42,7 +42,7 @@ export class Wallet extends Model {
 
   @Column({
     type: DataType.ENUM(...Object.values(Currency)),
-    defaultValue: Currency.USD,
+    defaultValue: Currency.NGN,
     allowNull: false,
   })
   currency: Currency;

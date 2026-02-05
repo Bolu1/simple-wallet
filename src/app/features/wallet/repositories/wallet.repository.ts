@@ -18,6 +18,10 @@ export class WalletRepository {
     });
   }
 
+  async findAll(): Promise<Wallet[]> {
+    return this.walletModel.findAll();
+  }
+
   async findByUserId(userId: string): Promise<Wallet[]> {
     return this.walletModel.findAll({
       where: { userId },
