@@ -32,12 +32,4 @@ export class AppConfigService {
   get redisUrl(): string {
     return this.get('REDIS_URL');
   }
-
-  get redisHost(): string {
-    return this.get('REDIS_HOST');
-  }
-
-  get redisPort(): number {
-    return this.get('REDIS_PORT');
-  }
 }
