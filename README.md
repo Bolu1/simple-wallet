@@ -77,7 +77,7 @@ docker-compose up -d --build
 To populate your environment with test data (Users and Wallets), use the following command to reach inside the running container:
 
 ```bash
-docker exec -it simple-wallet-app npm run seed
+docker exec -it simple-wallet-app npm run seed:prod
 
 ```
 
